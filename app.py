@@ -6,17 +6,63 @@ from PIL import Image
 import numpy as np
 
 # -------------------------------------------------------------------
-# 1. MODEL LOADING
-# We use @st.cache_resource so Streamlit loads the model into RAM
-# only ONCE when the app starts, instead of on every button click.
+# 1. PAGE CONFIGURATION & CUSTOM CSS
+# -------------------------------------------------------------------
+st.set_page_config(page_title="Mammography Research System", page_icon="🩺", layout="wide")
+
+# Custom CSS to make the UI look professional
+st.markdown("""
+    <style>
+    .main-header {
+        font-size: 2.5rem;
+        color: #1E3A8A;
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 0px;
+    }
+    .sub-header {
+        font-size: 1.3rem;
+        color: #4B5563;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# -------------------------------------------------------------------
+# 2. SIDEBAR: ACADEMIC METADATA
+# -------------------------------------------------------------------
+with st.sidebar:
+    st.markdown("### 🎓 Research Information")
+    
+    st.markdown("**Research Topic:**")
+    st.info("Breast Cancer Detection using Mammography: Image Processing to Deep Learning")
+    
+    st.markdown("**Researcher:**")
+    st.write("Fatima Farouk")
+    
+    st.markdown("**Institution:**")
+    st.write("Federal University Dutse (FUD)")
+    
+    st.markdown("---")
+    st.markdown("### ⚙️ Model Details")
+    st.write("**Architecture:** ResNet50 (Transfer Learning)")
+    st.write("**Dataset:** CBIS-DDSM")
+    st.write("**Framework:** PyTorch & Streamlit")
+
+# -------------------------------------------------------------------
+# 3. MAIN HEADER
+# -------------------------------------------------------------------
+st.markdown('<p class="main-header">🩺 Breast Mammogram Image Analysis</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">A Deep Learning Approach for Early Breast Cancer Detection</p>', unsafe_allow_html=True)
+
+# -------------------------------------------------------------------
+# 4. MODEL LOADING
 # -------------------------------------------------------------------
 @st.cache_resource
 def load_model():
-    # For now, we use a pre-trained ResNet50 as a placeholder.
-    # Later, we will replace this with your actual trained model weights.
+    # Placeholder model until we train the real one
     model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
-    
-    # Replace the final layer to output 2 classes: Benign, Malignant
     num_ftrs = model.fc.in_features
     model.fc = nn.Sequential(
         nn.Linear(num_ftrs, 256),
@@ -24,54 +70,34 @@ def load_model():
         nn.Dropout(0.5),
         nn.Linear(256, 2)
     )
-    
-    # Set model to evaluation mode
     model.eval()
     return model
 
 model = load_model()
 
 # -------------------------------------------------------------------
-# 2. IMAGE PREPROCESSING
-# This function takes the uploaded image and prepares it for the model.
+# 5. IMAGE PREPROCESSING & PREDICTION
 # -------------------------------------------------------------------
 def preprocess_image(image):
-    # Convert image to grayscale
     img = image.convert('L')
-    
-    # Resize to 224x224 (required by ResNet)
     img = img.resize((224, 224))
-    
-    # Convert to numpy array and normalize to [0, 1]
     img_array = np.array(img) / 255.0
-    
-    # Stack the single channel 3 times to create a 3-channel image (RGB)
-    # ResNet expects 3 channels, even for grayscale images.
     img_array = np.stack([img_array, img_array, img_array], axis=0)
-    
-    # Convert to PyTorch tensor and add a batch dimension (1, 3, 224, 224)
     img_tensor = torch.tensor(img_array, dtype=torch.float32).unsqueeze(0)
-    
     return img_tensor
 
-# -------------------------------------------------------------------
-# 3. PREDICTION FUNCTION
-# -------------------------------------------------------------------
 def predict_mammogram(image):
     if image is None:
         return "Please upload an image."
     
-    # Preprocess the image
     img_tensor = preprocess_image(image)
     
-    # Run inference (disable gradient calculation for speed)
     with torch.no_grad():
         outputs = model(img_tensor)
         probs = torch.softmax(outputs, dim=1)
         predicted_class = torch.argmax(probs, dim=1).item()
         confidence = probs[0][predicted_class].item()
     
-    # Format the output
     classes = ["Benign", "Malignant"]
     result_text = f"Prediction: {classes[predicted_class]}"
     confidence_text = f"Confidence: {confidence * 100:.2f}%"
@@ -79,38 +105,31 @@ def predict_mammogram(image):
     return result_text, confidence_text
 
 # -------------------------------------------------------------------
-# 4. STREAMLIT USER INTERFACE
+# 6. MAIN UI - UPLOAD & RESULTS
 # -------------------------------------------------------------------
-st.set_page_config(page_title="Mammography Research System", page_icon="🩺")
+st.markdown("---")
 
-st.title("🩺 Breast Mammogram Image Analysis")
-st.markdown("""
-**Research System Prototype**
-Upload a mammogram image to receive a model prediction. 
-*Note: This is a research prototype, not a clinical diagnostic tool.*
-""")
+col1, col2 = st.columns([1, 1])
 
-# File uploader
-uploaded_file = st.file_uploader("Choose a mammogram image (JPG, JPEG, PNG)...", type=["jpg", "jpeg", "png"])
-
-if uploaded_file is not None:
-    # Display the uploaded image (FIXED LINE BELOW)
-    image = Image.open(uploaded_file)
-    st.image(image, caption='Uploaded Mammogram', use_container_width=True)
+with col1:
+    st.markdown("### 📤 Upload Mammogram")
+    uploaded_file = st.file_uploader("Choose an image (JPG, JPEG, PNG)...", type=["jpg", "jpeg", "png"])
     
-    st.write("---")
-    
-    # Add a button to trigger the prediction
-    if st.button("Analyze Image"):
-        with st.spinner("Analyzing mammogram..."):
-            result_text, confidence_text = predict_mammogram(image)
-            
-            # Display results
-            st.success("Analysis Complete!")
-            col1, col2 = st.columns(2)
-            with col1:
+    if uploaded_file is not None:
+        image = Image.open(uploaded_file)
+        st.image(image, caption='Uploaded Mammogram', use_container_width=True)
+
+with col2:
+    st.markdown("### 📊 Analysis Results")
+    if uploaded_file is not None:
+        if st.button("Analyze Image", use_container_width=True):
+            with st.spinner("Analyzing mammogram..."):
+                result_text, confidence_text = predict_mammogram(image)
+                
+                st.success("Analysis Complete!")
                 st.metric(label="Model Prediction", value=result_text.split(": ")[1])
-            with col2:
                 st.metric(label="Confidence Score", value=confidence_text.split(": ")[1])
-            
-            st.info("⚠️ **Disclaimer:** This output is generated by a research prototype. It is not a medical diagnosis and should not be used for clinical decision-making.")
+                
+                st.info("⚠️ **Disclaimer:** This output is generated by a research prototype. It is not a medical diagnosis and should not be used for clinical decision-making.")
+    else:
+        st.write("Please upload an image to see the results.")
