@@ -10,7 +10,7 @@ import numpy as np
 # -------------------------------------------------------------------
 st.set_page_config(page_title="Mammography Research System", page_icon="🩺", layout="wide")
 
-# Custom CSS to make the UI look professional
+# Custom CSS to make the headings bold and professional
 st.markdown("""
     <style>
     .main-header {
@@ -26,23 +26,36 @@ st.markdown("""
         text-align: center;
         margin-bottom: 30px;
     }
+    .sidebar-heading {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #1E3A8A;
+        margin-bottom: 5px;
+        margin-top: 15px;
+    }
+    .sidebar-text {
+        font-size: 1rem;
+        color: #111827;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
 # -------------------------------------------------------------------
-# 2. SIDEBAR: ACADEMIC METADATA
+# 2. SIDEBAR: ACADEMIC METADATA (BOLD HEADINGS)
 # -------------------------------------------------------------------
 with st.sidebar:
-    st.markdown("### 🎓 Research Information")
+    st.markdown("## 🎓 Research Information")
     
-    st.markdown("**Research Topic:**")
-    st.info("Breast Cancer Detection using Mammography: Image Processing to Deep Learning")
+    st.markdown('<p class="sidebar-heading">Research Topic:</p>', unsafe_allow_html=True)
+    st.markdown('<p class="sidebar-text">Breast Cancer Detection using Mammography: Image Processing to Deep Learning</p>', unsafe_allow_html=True)
     
-    st.markdown("**Researcher:**")
-    st.write("Fatima Farouk")
+    st.markdown('<p class="sidebar-heading">Researcher:</p>', unsafe_allow_html=True)
+    st.markdown('<p class="sidebar-text">Fatima Farouk</p>', unsafe_allow_html=True)
     
-    st.markdown("**Institution:**")
-    st.write("Federal University Dutse (FUD)")
+    st.markdown('<p class="sidebar-heading">Institution:</p>', unsafe_allow_html=True)
+    st.markdown('<p class="sidebar-text">Federal University Dutse (FUD)</p>', unsafe_allow_html=True)
     
     st.markdown("---")
     st.markdown("### ⚙️ Model Details")
