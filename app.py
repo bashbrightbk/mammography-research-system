@@ -6,56 +6,25 @@ from PIL import Image
 import numpy as np
 
 # -------------------------------------------------------------------
-# 1. PAGE CONFIGURATION & CUSTOM CSS
+# 1. PAGE CONFIGURATION
 # -------------------------------------------------------------------
 st.set_page_config(page_title="Mammography Research System", page_icon="🩺", layout="wide")
 
-# Custom CSS to make the headings bold and professional
-st.markdown("""
-    <style>
-    .main-header {
-        font-size: 2.5rem;
-        color: #1E3A8A;
-        text-align: center;
-        font-weight: bold;
-        margin-bottom: 0px;
-    }
-    .sub-header {
-        font-size: 1.3rem;
-        color: #4B5563;
-        text-align: center;
-        margin-bottom: 30px;
-    }
-    .sidebar-heading {
-        font-size: 1.1rem;
-        font-weight: bold;
-        color: #1E3A8A;
-        margin-bottom: 5px;
-        margin-top: 15px;
-    }
-    .sidebar-text {
-        font-size: 1rem;
-        color: #111827;
-        font-weight: bold;
-        margin-bottom: 15px;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
 # -------------------------------------------------------------------
-# 2. SIDEBAR: ACADEMIC METADATA (BOLD HEADINGS)
+# 2. SIDEBAR: ACADEMIC METADATA
 # -------------------------------------------------------------------
 with st.sidebar:
-    st.markdown("## 🎓 Research Information")
+    st.title("🎓 Research Information")
+    st.markdown("---")
     
-    st.markdown('<p class="sidebar-heading">Research Topic:</p>', unsafe_allow_html=True)
-    st.markdown('<p class="sidebar-text">Breast Cancer Detection using Mammography: Image Processing to Deep Learning</p>', unsafe_allow_html=True)
+    st.markdown("#### **Research Topic:**")
+    st.info("Breast Cancer Detection using Mammography: Image Processing to Deep Learning")
     
-    st.markdown('<p class="sidebar-heading">Researcher:</p>', unsafe_allow_html=True)
-    st.markdown('<p class="sidebar-text">Fatima Farouk</p>', unsafe_allow_html=True)
+    st.markdown("#### **Researcher:**")
+    st.success("Fatima Farouk")
     
-    st.markdown('<p class="sidebar-heading">Institution:</p>', unsafe_allow_html=True)
-    st.markdown('<p class="sidebar-text">Federal University Dutse (FUD)</p>', unsafe_allow_html=True)
+    st.markdown("#### **Institution:**")
+    st.warning("Federal University Dutse (FUD)")
     
     st.markdown("---")
     st.markdown("### ⚙️ Model Details")
@@ -64,10 +33,18 @@ with st.sidebar:
     st.write("**Framework:** PyTorch & Streamlit")
 
 # -------------------------------------------------------------------
-# 3. MAIN HEADER
+# 3. MAIN TOP HEADER (Centered & Academic)
 # -------------------------------------------------------------------
-st.markdown('<p class="main-header">🩺 Breast Mammogram Image Analysis</p>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">A Deep Learning Approach for Early Breast Cancer Detection</p>', unsafe_allow_html=True)
+# Using columns to center the content perfectly
+col1, col2, col3 = st.columns([1, 6, 1])
+
+with col2:
+    st.markdown("<h3 style='text-align: center; color: gray; margin-bottom: 0;'>Federal University Dutse (FUD)</h3>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; margin-top: 10px; margin-bottom: 5px;'>Breast Cancer Detection using Mammography</h1>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center; color: gray; margin-top: 0;'>Image Processing to Deep Learning</h3>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; font-size: 1.1rem; margin-top: 15px;'><strong>Researcher:</strong> Fatima Farouk</p>", unsafe_allow_html=True)
+
+st.markdown("---")
 
 # -------------------------------------------------------------------
 # 4. MODEL LOADING
@@ -120,11 +97,9 @@ def predict_mammogram(image):
 # -------------------------------------------------------------------
 # 6. MAIN UI - UPLOAD & RESULTS
 # -------------------------------------------------------------------
-st.markdown("---")
+col_upload, col_results = st.columns([1, 1])
 
-col1, col2 = st.columns([1, 1])
-
-with col1:
+with col_upload:
     st.markdown("### 📤 Upload Mammogram")
     uploaded_file = st.file_uploader("Choose an image (JPG, JPEG, PNG)...", type=["jpg", "jpeg", "png"])
     
@@ -132,7 +107,7 @@ with col1:
         image = Image.open(uploaded_file)
         st.image(image, caption='Uploaded Mammogram', use_container_width=True)
 
-with col2:
+with col_results:
     st.markdown("### 📊 Analysis Results")
     if uploaded_file is not None:
         if st.button("Analyze Image", use_container_width=True):
